@@ -1,0 +1,39 @@
+# Build
+build/
+out/
+bin/
+obj/
+x64/
+x86/
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.obj
+*.lib
+*.exp
+
+# Visual Studio / MSBuild
+.vs/
+*.user
+*.suo
+*.sln.docstates
+
+# Rust
+target/
+
+# IDE
+.idea/
+.vscode/
+
+# Secrets
+*.pfx
+*.p12
+.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
