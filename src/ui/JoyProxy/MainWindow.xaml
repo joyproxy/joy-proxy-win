@@ -1,0 +1,88 @@
+<Window x:Class="JoyProxy.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="JoyProxy" Height="640" Width="760"
+        MinHeight="560" MinWidth="680"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="JoyProxy for Windows" FontSize="24" FontWeight="SemiBold"/>
+            <TextBlock Text="按 exe 将 TCP 流量转发到 HTTP / SOCKS5 代理（v1 Winsock Hook 注入）"
+                       Foreground="#666" Margin="0,4,0,0"/>
+            <TextBlock Text="连接时需要一次管理员授权（UAC），用于向目标进程注入网络 Hook。"
+                       Foreground="#888" TextWrapping="Wrap" Margin="0,6,0,0"/>
+        </StackPanel>
+
+        <GroupBox Grid.Row="1" Header="代理配置" Padding="12" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="协议" VerticalAlignment="Center"/>
+                <ComboBox x:Name="ProxyTypeCombo" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8">
+                    <ComboBoxItem Content="SOCKS5"/>
+                    <ComboBoxItem Content="HTTP"/>
+                </ComboBox>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="地址" VerticalAlignment="Center"/>
+                <TextBox x:Name="HostBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="端口" VerticalAlignment="Center"/>
+                <TextBox x:Name="PortBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,8"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="用户名" VerticalAlignment="Center"/>
+                <TextBox x:Name="UserBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,8"/>
+
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="密码" VerticalAlignment="Center"/>
+                <PasswordBox x:Name="PassBox" Grid.Row="4" Grid.Column="1"/>
+
+                <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="5" Margin="12,0,0,0">
+                    <Button Content="测试代理" Click="TestProxy_Click" Padding="12,6" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="HistoryCombo" Width="140" SelectionChanged="HistoryCombo_SelectionChanged"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="2" Header="目标程序 (.exe)" Padding="12" Margin="0,0,0,12">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="浏览..." Click="BrowseExe_Click" Padding="12,6" Margin="8,0,0,0"/>
+                </StackPanel>
+                <TextBox x:Name="TargetExeBox"/>
+            </DockPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Header="运行中进程（辅助选择）" Padding="12" Margin="0,0,0,12">
+            <DockPanel>
+                <Button DockPanel.Dock="Top" Content="刷新列表" Click="RefreshProcesses_Click"
+                        HorizontalAlignment="Left" Padding="12,6" Margin="0,0,0,8"/>
+                <ListBox x:Name="ProcessList"
+                         SelectionChanged="ProcessList_SelectionChanged"/>
+            </DockPanel>
+        </GroupBox>
+
+        <TextBlock x:Name="StatusText" Grid.Row="4" Text="未连接" Margin="0,0,0,12"/>
+
+        <Button x:Name="ConnectButton" Grid.Row="5" Content="连接代理"
+                Click="Connect_Click" Padding="16,10" FontSize="16" HorizontalAlignment="Stretch"/>
+    </Grid>
+</Window>
