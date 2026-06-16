@@ -11,6 +11,7 @@ Set-Location $Root
 Write-Host "==> Building Rust relay..."
 if (Get-Command cargo -ErrorAction SilentlyContinue) {
     cargo build --release -p joyproxy_relay
+    if ($LASTEXITCODE -ne 0) { throw "cargo build failed" }
     New-Item -ItemType Directory -Force -Path "$Root\artifacts\$Configuration" | Out-Null
     Copy-Item "$Root\target\release\joyproxy_relay.dll" "$Root\artifacts\$Configuration\" -Force
 } else {

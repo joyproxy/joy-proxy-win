@@ -33,12 +33,17 @@ pub fn relay_bidirectional(mut local: TcpStream, mut upstream: TcpStream) -> Res
     let done_a = Arc::clone(&done);
     let done_b = Arc::clone(&done);
 
+    let mut upstream = upstream;
+    let mut local = local;
+
     let t1 = thread::spawn(move || {
+        let mut local_reader = local_reader;
         let _ = copy(&mut local_reader, &mut upstream);
         done_a.store(true, Ordering::SeqCst);
         let _ = upstream.shutdown(Shutdown::Both);
     });
     let t2 = thread::spawn(move || {
+        let mut upstream_reader = upstream_reader;
         let _ = copy(&mut upstream_reader, &mut local);
         done_b.store(true, Ordering::SeqCst);
         let _ = local.shutdown(Shutdown::Both);

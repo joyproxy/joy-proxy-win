@@ -77,7 +77,7 @@ pub extern "C" fn joyproxy_relay_tcp(
             None => return -1,
         };
         let stream = unsafe { TcpStream::from_raw_socket(local_socket as RawSocket) };
-        relay::relay_tcp_socket(stream, &dest, dest_port, &proxy)
+        relay::map_io_result(relay::relay_tcp_socket(stream, &dest, dest_port, &proxy))
     }));
     match result {
         Ok(r) => relay::map_io_result(r),
