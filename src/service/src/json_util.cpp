@@ -22,11 +22,19 @@ std::string JsonGetString(const std::string& json, const std::string& key) {
     if (q1 == std::string::npos) {
         return {};
     }
-    const size_t q2 = json.find('"', q1 + 1);
-    if (q2 == std::string::npos) {
-        return {};
+    std::string out;
+    for (size_t i = q1 + 1; i < json.size(); ++i) {
+        if (json[i] == '"') {
+            break;
+        }
+        if (json[i] == '\\' && i + 1 < json.size()) {
+            out.push_back(json[i + 1]);
+            ++i;
+        } else {
+            out.push_back(json[i]);
+        }
     }
-    return JsonUnescape(json.substr(q1 + 1, q2 - q1 - 1));
+    return out;
 }
 
 int JsonGetInt(const std::string& json, const std::string& key, int default_value) {

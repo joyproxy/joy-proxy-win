@@ -1,15 +1,15 @@
 <Window x:Class="JoyProxy.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="JoyProxy" Height="640" Width="760"
-        MinHeight="560" MinWidth="680"
+        Title="JoyProxy" Height="760" Width="780"
+        MinHeight="640" MinWidth="680"
         WindowStartupLocation="CenterScreen">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition MinHeight="280" Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -72,15 +72,15 @@
         </GroupBox>
 
         <GroupBox Grid.Row="3" Header="运行中进程（辅助选择）" Padding="12" Margin="0,0,0,12">
-            <DockPanel>
+            <DockPanel LastChildFill="True">
                 <Button DockPanel.Dock="Top" Content="刷新列表" Click="RefreshProcesses_Click"
                         HorizontalAlignment="Left" Padding="12,6" Margin="0,0,0,8"/>
-                <ListBox x:Name="ProcessList"
+                <ListBox x:Name="ProcessList" MinHeight="240"
                          SelectionChanged="ProcessList_SelectionChanged"/>
             </DockPanel>
         </GroupBox>
 
-        <TextBlock x:Name="StatusText" Grid.Row="4" Text="未连接" Margin="0,0,0,12"/>
+        <TextBlock x:Name="StatusText" Grid.Row="4" Text="未连接" Margin="0,0,0,12" TextWrapping="Wrap"/>
 
         <Button x:Name="ConnectButton" Grid.Row="5" Content="连接代理"
                 Click="Connect_Click" Padding="16,10" FontSize="16" HorizontalAlignment="Stretch"/>

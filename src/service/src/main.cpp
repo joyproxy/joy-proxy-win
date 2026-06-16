@@ -3,6 +3,8 @@
 #include "json_util.h"
 #include "pipe_server.h"
 
+#include <joyproxy/security.h>
+
 #include <TlHelp32.h>
 #include <Psapi.h>
 #include <cstdio>
@@ -190,6 +192,15 @@ DWORD WINAPI ParentWatchThread(LPVOID param) {
 }  // namespace
 
 int wmain(int argc, wchar_t* argv[]) {
+    HANDLE mutex = CreateMutexW(EveryoneSecurityAttributes(), TRUE, L"Global\\JoyProxyService_v1");
+    if (!mutex) {
+        return 1;
+    }
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        // Another elevated helper is already running.
+        return 0;
+    }
+
     for (int i = 1; i < argc; ++i) {
         if (wcscmp(argv[i], L"--parent-pid") == 0 && i + 1 < argc) {
             g_parent_pid = static_cast<DWORD>(_wtoi(argv[i + 1]));
@@ -207,11 +218,6 @@ int wmain(int argc, wchar_t* argv[]) {
     joyproxy::PipeServer server(LR"(\\.\pipe\joyproxy-v1)");
     if (!server.Start(HandleRequest)) {
         return 1;
-    }
-
-    HANDLE mutex = CreateMutexW(nullptr, TRUE, L"Global\\JoyProxyService_v1");
-    if (!mutex || GetLastError() == ERROR_ALREADY_EXISTS) {
-        return 2;
     }
 
     while (true) {

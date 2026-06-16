@@ -1,5 +1,7 @@
 #include "config_mapping.h"
 
+#include <joyproxy/security.h>
+
 #include <Shlwapi.h>
 
 #pragma comment(lib, "Shlwapi.lib")
@@ -24,8 +26,8 @@ bool PathsEqual(const std::wstring& a, const std::wstring& b) {
 
 bool ConfigMapping::Create(const HookConfig& cfg) {
     Close();
-    map_ = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, sizeof(HookConfig),
-        SharedConfigName());
+    map_ = CreateFileMappingW(INVALID_HANDLE_VALUE, EveryoneSecurityAttributes(), PAGE_READWRITE, 0,
+        sizeof(HookConfig), SharedConfigName());
     if (!map_) {
         return false;
     }

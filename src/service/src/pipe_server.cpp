@@ -1,5 +1,7 @@
 #include "pipe_server.h"
 
+#include <joyproxy/security.h>
+
 #include <string>
 
 namespace joyproxy {
@@ -52,7 +54,7 @@ void PipeServer::Run() {
             65536,
             65536,
             0,
-            nullptr);
+            EveryoneSecurityAttributes());
         if (pipe == INVALID_HANDLE_VALUE) {
             Sleep(200);
             continue;

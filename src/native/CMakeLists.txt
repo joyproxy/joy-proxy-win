@@ -16,6 +16,7 @@ set(JOYPROXY_COMMON_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../common/include)
 
 add_library(joyproxy_common STATIC
     ../common/src/config_shared.cpp
+    ../common/src/security.cpp
 )
 target_include_directories(joyproxy_common PUBLIC ${JOYPROXY_COMMON_INCLUDE})
 

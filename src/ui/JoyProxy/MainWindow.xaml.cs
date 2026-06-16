@@ -146,31 +146,51 @@ public partial class MainWindow : Window
         }
 
         SaveSettings();
-        SetStatus("正在请求管理员权限并启动服务...");
-        if (!ServiceLauncher.TryLaunchElevated(Environment.ProcessId, out var launchError))
+        ConnectButton.IsEnabled = false;
+        try
         {
-            SetStatus(launchError ?? "启动服务失败");
-            return;
-        }
+            SetStatus("正在连接 JoyProxyService...");
+            var pong = await _client.WaitForPingAsync(3, 200);
+            if (pong == null)
+            {
+                SetStatus("正在请求管理员权限并启动服务...");
+                if (!ServiceLauncher.TryLaunchElevated(Environment.ProcessId, out var launchError))
+                {
+                    SetStatus(launchError ?? "启动服务失败");
+                    return;
+                }
+                pong = await _client.WaitForPingAsync(20, 400);
+            }
+            if (pong == null)
+            {
+                SetStatus("无法连接 JoyProxyService（请确认 UAC 已允许，且 JoyProxyService.exe 与 JoyProxy.exe 在同一目录）");
+                return;
+            }
 
-        await Task.Delay(1200);
-        var pong = await _client.PingAsync();
-        if (pong?.Type != "pong")
-        {
-            SetStatus("无法连接 JoyProxyService（请确认 UAC 已允许）");
-            return;
+            SetStatus("正在注入 Hook...");
+            var resp = await _client.StartAsync(proxy, exe);
+            if (resp?.Type == "started")
+            {
+                _connected = true;
+                ConnectButton.Content = "断开代理";
+                SetStatus($"已连接 · 目标: {Path.GetFileName(exe)} · 已有进程将走代理，新启动的同路径进程也会自动注入");
+                return;
+            }
+            var detail = resp?.Message;
+            if (!string.IsNullOrWhiteSpace(resp?.Code))
+            {
+                detail = string.IsNullOrWhiteSpace(detail) ? resp.Code : $"{resp.Code}: {detail}";
+            }
+            SetStatus(string.IsNullOrWhiteSpace(detail) ? "连接失败" : $"连接失败 · {detail}");
         }
-
-        SetStatus("正在注入 Hook...");
-        var resp = await _client.StartAsync(proxy, exe);
-        if (resp?.Type == "started")
+        catch (Exception ex)
         {
-            _connected = true;
-            ConnectButton.Content = "断开代理";
-            SetStatus($"已连接 · 目标: {Path.GetFileName(exe)} · 已有进程将走代理，新启动的同路径进程也会自动注入");
-            return;
+            SetStatus($"连接失败 · {ex.Message}");
         }
-        SetStatus(resp?.Message ?? resp?.Code ?? "连接失败");
+        finally
+        {
+            ConnectButton.IsEnabled = true;
+        }
     }
 
     private void HistoryCombo_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
