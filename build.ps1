@@ -22,7 +22,9 @@ Write-Host "==> Building native (CMake)..."
 $NativeBuild = "$Root\build\native"
 New-Item -ItemType Directory -Force -Path $NativeBuild | Out-Null
 cmake -S "$Root\src\native" -B $NativeBuild -A x64
+if ($LASTEXITCODE -ne 0) { throw "cmake configure failed" }
 cmake --build $NativeBuild --config $Configuration
+if ($LASTEXITCODE -ne 0) { throw "cmake build failed" }
 
 Copy-Item "$NativeBuild\$Configuration\JoyProxyHook.dll" "$Root\artifacts\$Configuration\" -Force
 Copy-Item "$NativeBuild\$Configuration\JoyProxyService.exe" "$Root\artifacts\$Configuration\" -Force

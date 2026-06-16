@@ -21,6 +21,11 @@ jobs:
       - name: Install CMake
         run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
       - name: Build all
         shell: pwsh
         run: ./build.ps1 -Configuration Release

@@ -4,6 +4,7 @@
 #include <WS2tcpip.h>
 #include <Windows.h>
 
+#include <joyproxy/config.h>
 #include <string>
 
 namespace joyproxy {
