@@ -80,7 +80,7 @@ pub extern "C" fn joyproxy_relay_tcp(
         relay::map_io_result(relay::relay_tcp_socket(stream, &dest, dest_port, &proxy))
     }));
     match result {
-        Ok(r) => relay::map_io_result(r),
+        Ok(r) => r,
         Err(_) => -99,
     }
 }
