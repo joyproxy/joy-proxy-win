@@ -9,7 +9,7 @@ public enum ProxyTypeKind
     Http
 }
 
-public sealed class ProxySettings
+public sealed record ProxySettings
 {
     public ProxyTypeKind Type { get; set; } = ProxyTypeKind.Socks5;
     public string Host { get; set; } = "";

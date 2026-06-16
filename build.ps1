@@ -33,6 +33,7 @@ Write-Host "==> Building UI..."
 $UiDir = "$Root\src\ui\JoyProxy"
 if (Get-Command dotnet -ErrorAction SilentlyContinue) {
     dotnet publish $UiDir -c $Configuration -r win-x64 --self-contained false -o "$Root\artifacts\$Configuration"
+    if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
 } else {
     Write-Warning "dotnet not found, skip UI build"
 }
