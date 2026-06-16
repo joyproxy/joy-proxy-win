@@ -16,7 +16,7 @@ using WSAConnectFn = int (WSAAPI*)(SOCKET, const sockaddr*, int, LPWSABUF, LPWSA
 ConnectFn g_real_connect = nullptr;
 WSAConnectFn g_real_wsaconnect = nullptr;
 
-HookConfig g_cfg{};
+joyproxy::HookConfig g_cfg{};
 bool g_cfg_loaded = false;
 std::once_flag g_init_flag;
 std::mutex g_log_mutex;
@@ -41,12 +41,12 @@ bool LoadConfig() {
     if (!map) {
         return false;
     }
-    const void* view = MapViewOfFile(map, FILE_MAP_READ, 0, 0, sizeof(HookConfig));
+    const void* view = MapViewOfFile(map, FILE_MAP_READ, 0, 0, sizeof(joyproxy::HookConfig));
     if (!view) {
         CloseHandle(map);
         return false;
     }
-    g_cfg = *static_cast<const HookConfig*>(view);
+    g_cfg = *static_cast<const joyproxy::HookConfig*>(view);
     UnmapViewOfFile(view);
     CloseHandle(map);
     g_cfg_loaded = g_cfg.magic == joyproxy::kHookConfigMagic && g_cfg.version == 1 && g_cfg.enabled != 0;
