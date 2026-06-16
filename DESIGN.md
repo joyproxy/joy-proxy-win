@@ -1,7 +1,8 @@
 # JoyProxy Windows 概要设计
 
-> 文档版本：v0.1（概要设计，待审核）  
+> 文档版本：v0.2（概要设计，决策已确认）  
 > 日期：2026-06-16  
+> 详细设计：[docs/DETAILED_DESIGN.md](docs/DETAILED_DESIGN.md)  
 > 关联项目：[joy-proxy-android](https://github.com/joyproxy/joy-proxy-android)
 
 ---
@@ -376,17 +377,19 @@ v3.0  Proxifier 级
 
 ---
 
-## 十、待审核决策点
+## 十、已确认决策（2026-06-16）
 
-请审核时重点确认以下问题，审核通过后我将输出《详细设计》（`docs/DETAILED_DESIGN.md`）并开始编码：
+| # | 决策点 | 结论 |
+|---|--------|------|
+| 1 | UI 框架 | **WinUI 3** |
+| 2 | 语言分工 | **C++**（WFP）+ **Rust**（Relay）+ **C#**（UI） |
+| 3 | Helper 模型 | **v1 按需 UAC**，断开即退出 |
+| 4 | 进程选择 | **exe 路径为主** + 运行中进程辅助 |
+| 5 | 许可证 | **GPLv3** |
+| 6 | 排除自身 | **默认强制排除** |
+| 7 | UAC | **接受**，UI 透明说明 |
 
-1. **UI 框架**：WinUI 3 vs WPF？（建议 WinUI 3）
-2. **WFP 实现语言**：C++ vs Rust？（建议 WFP 用 C++，Relay 用 Rust）
-3. **Helper 模型**：按需 UAC 提升 vs 安装 Windows Service？（建议 v1 按需提升）
-4. **v1 进程选择**：仅 exe 路径 vs 支持运行中进程？（建议两者都支持）
-5. **许可证**：统一 GPLv3（与 Android / 未来 sing-box 一致）是否 OK？
-6. **v1 是否排除本工具自身 exe 的流量**（防止环路）—— 建议默认排除 JoyProxy 相关进程
-7. **是否接受「连接时必须 UAC」**—— WFP 无法绕过，需在 UI 明确告知
+详见 [docs/DETAILED_DESIGN.md](docs/DETAILED_DESIGN.md)。
 
 ---
 
@@ -400,4 +403,4 @@ v3.0  Proxifier 级
 
 ---
 
-*本文档为概要设计，审核通过后进入详细设计与实现阶段。*
+*概要设计已确认；详细设计见 docs/DETAILED_DESIGN.md，按 M1 里程碑进入编码。*

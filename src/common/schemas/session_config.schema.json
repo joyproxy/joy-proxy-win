@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://joyproxy.github.io/schemas/session_config.v1.json",
+  "title": "JoyProxy SessionConfig v1",
+  "type": "object",
+  "required": ["version", "proxy", "target"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "proxy": {
+      "type": "object",
+      "required": ["type", "host", "port"],
+      "properties": {
+        "type": { "type": "string", "enum": ["socks5", "http"] },
+        "host": { "type": "string", "minLength": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": ["exePath"],
+      "properties": {
+        "exePath": { "type": "string", "minLength": 1 }
+      }
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "maxConnections": { "type": "integer", "minimum": 1, "default": 256 },
+        "excludeSelf": { "type": "boolean", "default": true }
+      }
+    }
+  }
+}
