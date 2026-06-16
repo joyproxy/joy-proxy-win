@@ -11,7 +11,6 @@ public partial class MainWindow : Window
 {
     private readonly ServiceClient _client = new();
     private readonly ObservableCollection<string> _historyItems = new();
-    private readonly ObservableCollection<ProcessPickerService.ProcessItem> _processes = new();
     private AppSettings _settings;
     private bool _connected;
 
@@ -26,9 +25,7 @@ public partial class MainWindow : Window
         PassBox.Password = _settings.LastProxy.Password;
         TargetExeBox.Text = _settings.LastTargetExe;
         HistoryCombo.ItemsSource = _historyItems;
-        ProcessList.ItemsSource = _processes;
         ReloadHistory();
-        RefreshProcesses();
     }
 
     private void ReloadHistory()
@@ -57,7 +54,6 @@ public partial class MainWindow : Window
     {
         _settings.LastProxy = ReadProxy();
         _settings.LastTargetExe = TargetExeBox.Text.Trim();
-        var key = $"{_settings.LastProxy.Type} {_settings.LastProxy.Host}:{_settings.LastProxy.Port}";
         _settings.ProxyHistory.RemoveAll(h =>
             h.Type == _settings.LastProxy.Type && h.Host == _settings.LastProxy.Host && h.Port == _settings.LastProxy.Port);
         _settings.ProxyHistory.Insert(0, _settings.LastProxy with { });
@@ -69,10 +65,7 @@ public partial class MainWindow : Window
         ReloadHistory();
     }
 
-    private void SetStatus(string text)
-    {
-        StatusText.Text = text;
-    }
+    private void SetStatus(string text) => StatusText.Text = text;
 
     private async void TestProxy_Click(object sender, RoutedEventArgs e)
     {
@@ -86,10 +79,7 @@ public partial class MainWindow : Window
         await Task.Run(() =>
         {
             var code = RelayNative.TestProxy(proxy);
-            Dispatcher.Invoke(() =>
-            {
-                SetStatus(code == 0 ? "代理测试成功" : $"代理测试失败 ({code})");
-            });
+            Dispatcher.Invoke(() => SetStatus(code == 0 ? "代理测试成功" : $"代理测试失败 ({code})"));
         });
     }
 
@@ -106,22 +96,12 @@ public partial class MainWindow : Window
         }
     }
 
-    private void RefreshProcesses_Click(object sender, RoutedEventArgs e) => RefreshProcesses();
-
-    private void RefreshProcesses()
+    private void PickProcess_Click(object sender, RoutedEventArgs e)
     {
-        _processes.Clear();
-        foreach (var item in ProcessPickerService.ListProcesses())
+        var dlg = new ProcessPickerWindow { Owner = this };
+        if (dlg.ShowDialog() == true && !string.IsNullOrWhiteSpace(dlg.SelectedExePath))
         {
-            _processes.Add(item);
-        }
-    }
-
-    private void ProcessList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-    {
-        if (ProcessList.SelectedItem is ProcessPickerService.ProcessItem item)
-        {
-            TargetExeBox.Text = item.ExePath;
+            TargetExeBox.Text = dlg.SelectedExePath;
         }
     }
 
@@ -130,10 +110,7 @@ public partial class MainWindow : Window
         if (_connected)
         {
             SetStatus("正在断开...");
-            await _client.StopAsync();
-            _connected = false;
-            ConnectButton.Content = "连接代理";
-            SetStatus("已断开");
+            await DisconnectSessionAsync();
             return;
         }
 
@@ -150,20 +127,20 @@ public partial class MainWindow : Window
         try
         {
             SetStatus("正在连接 JoyProxyService...");
-            var pong = await _client.WaitForPingAsync(3, 200);
+            var pong = await _client.WaitForPingAsync(2, 150);
             if (pong == null)
             {
-                SetStatus("正在请求管理员权限并启动服务...");
-                if (!ServiceLauncher.TryLaunchElevated(Environment.ProcessId, out var launchError))
+                SetStatus("正在请求管理员权限并启动服务（将清理残留进程）...");
+                if (!ServiceLauncher.TryLaunchElevated(Environment.ProcessId, replaceStale: true, out var launchError))
                 {
                     SetStatus(launchError ?? "启动服务失败");
                     return;
                 }
-                pong = await _client.WaitForPingAsync(20, 400);
+                pong = await _client.WaitForPingAsync(30, 300);
             }
             if (pong == null)
             {
-                SetStatus("无法连接 JoyProxyService（请确认 UAC 已允许，且 JoyProxyService.exe 与 JoyProxy.exe 在同一目录）");
+                SetStatus("无法连接 JoyProxyService。请确认 UAC 已允许，4 个文件在同一目录；或在任务管理器结束 JoyProxyService.exe 后重试。");
                 return;
             }
 
@@ -173,7 +150,7 @@ public partial class MainWindow : Window
             {
                 _connected = true;
                 ConnectButton.Content = "断开代理";
-                SetStatus($"已连接 · 目标: {Path.GetFileName(exe)} · 已有进程将走代理，新启动的同路径进程也会自动注入");
+                SetStatus($"已连接 · 目标: {Path.GetFileName(exe)} · 关闭目标程序后 Hook 才会完全移除");
                 return;
             }
             var detail = resp?.Message;
@@ -190,6 +167,37 @@ public partial class MainWindow : Window
         finally
         {
             ConnectButton.IsEnabled = true;
+        }
+    }
+
+    private async Task DisconnectSessionAsync()
+    {
+        try
+        {
+            await _client.StopAsync();
+        }
+        catch
+        {
+            // ignore IPC errors on stop
+        }
+        _connected = false;
+        ConnectButton.Content = "连接代理";
+        SetStatus("已断开（JoyProxyService 仍在后台；退出本窗口时会自动结束）");
+    }
+
+    private async void Window_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        try
+        {
+            if (_connected)
+            {
+                await _client.StopAsync();
+            }
+            await _client.ShutdownServiceAsync();
+        }
+        catch
+        {
+            // best effort cleanup
         }
     }
 

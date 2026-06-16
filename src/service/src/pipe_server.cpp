@@ -50,7 +50,7 @@ void PipeServer::Run() {
             pipe_name_.c_str(),
             PIPE_ACCESS_DUPLEX,
             PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-            1,
+            4,
             65536,
             65536,
             0,

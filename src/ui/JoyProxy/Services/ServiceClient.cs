@@ -15,7 +15,7 @@ public sealed class ServiceClient(string pipeName = "joyproxy-v1")
         var pipe = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
         try
         {
-            await pipe.ConnectAsync(5000, cancellationToken);
+            await pipe.ConnectAsync(2000, cancellationToken);
             request.Id = Interlocked.Increment(ref _nextId);
             var json = JsonSerializer.Serialize(request);
             var bytes = Encoding.UTF8.GetBytes(json + "\n");
@@ -65,6 +65,9 @@ public sealed class ServiceClient(string pipeName = "joyproxy-v1")
 
     public Task<IpcResponse?> StopAsync(CancellationToken ct = default) =>
         SendAsync(new IpcRequest { Type = "stop" }, ct);
+
+    public Task<IpcResponse?> ShutdownServiceAsync(CancellationToken ct = default) =>
+        SendAsync(new IpcRequest { Type = "shutdown" }, ct);
 
     public Task<IpcResponse?> StatusAsync(CancellationToken ct = default) =>
         SendAsync(new IpcRequest { Type = "status" }, ct);

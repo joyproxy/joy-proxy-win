@@ -40,7 +40,7 @@ public static class SettingsStore
 
 public static class ServiceLauncher
 {
-    public static bool TryLaunchElevated(int parentPid, out string? error)
+    public static bool TryLaunchElevated(int parentPid, bool replaceStale, out string? error)
     {
         error = null;
         var exe = Path.Combine(AppContext.BaseDirectory, "JoyProxyService.exe");
@@ -49,10 +49,15 @@ public static class ServiceLauncher
             error = "JoyProxyService.exe not found beside JoyProxy.exe";
             return false;
         }
+        var args = $"--parent-pid {parentPid}";
+        if (replaceStale)
+        {
+            args += " --replace";
+        }
         var psi = new ProcessStartInfo
         {
             FileName = exe,
-            Arguments = $"--parent-pid {parentPid}",
+            Arguments = args,
             UseShellExecute = true,
             Verb = "runas",
             WorkingDirectory = AppContext.BaseDirectory
@@ -113,7 +118,8 @@ public static class ProcessPickerService
 {
     public sealed record ProcessItem(int Pid, string Name, string ExePath)
     {
-        public override string ToString() => $"{Name} ({Pid}) — {ExePath}";
+        public string Display => $"{Name} ({Pid}) — {ExePath}";
+        public override string ToString() => Display;
     }
 
     public static IEnumerable<ProcessItem> ListProcesses()
