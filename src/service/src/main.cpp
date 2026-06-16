@@ -192,7 +192,7 @@ DWORD WINAPI ParentWatchThread(LPVOID param) {
 }  // namespace
 
 int wmain(int argc, wchar_t* argv[]) {
-    HANDLE mutex = CreateMutexW(EveryoneSecurityAttributes(), TRUE, L"Global\\JoyProxyService_v1");
+    HANDLE mutex = CreateMutexW(joyproxy::EveryoneSecurityAttributes(), TRUE, L"Global\\JoyProxyService_v1");
     if (!mutex) {
         return 1;
     }
